@@ -1,36 +1,50 @@
 require './question.rb'
 require './players.rb'
 
+START = "Let's test your math skills!"
+PL1_PROMPT_NAME = "Please enter a name for Player 1"
+PL2_PROMPT_NAME = "Please enter a name for Player 2"
+NEWTURN = "-------NEW TURN--------"
+GAMEOVER = "-------GAME OVER-------"
+GOODBYE = "--------GOODBYE--------"
+
 class Game
 
-  attr_reader :current_player, :ask_question, 
-              :check_player_death, :get_answer, :put_score, :determine_current_player
-  attr_accessor :change_turn, :evaluate_answer
-  
-
   def initialize 
-    puts "Let's test your math skills!"
-    puts "Please enter a name for Player 1"
+    puts START
+    puts PL1_PROMPT_NAME
     player1_name = gets.chomp
     @player1 = Player.new(player1_name, true)
     @current_player = @player1
-    puts "Please enter a name for Player 2"
+    puts PL2_PROMPT_NAME
     player2_name = gets.chomp
     @player2 = Player.new(player2_name, false)
   end
   
+  def run
+    until (self.check_player_death)
+      self.determine_current_player
+      puts NEWTURN
+      self.ask_question
+      self.get_answer
+      self.evaluate_answer
+      self.put_score
+      self.change_turn
+    end
+  end
+
   def determine_current_player
-    if @player1.turn == true
+    if @player1.turn
       @current_player = @player1
     else @current_player = @player2
     end
   end
 
   def check_player_death
-    if @current_player.life == 0
-      puts "-------GAME OVER-------"
+    if @current_player.life.zero?
+      puts GAMEOVER
       puts @current_player.name + ' lost'
-      puts "--------GOODBYE--------"
+      puts GOODBYE
       return true
     end
   end
@@ -38,6 +52,7 @@ class Game
   def ask_question
     puts @current_player.name + ':'
     @question = Question.new
+    puts @question.question
   end
 
   def get_answer
@@ -46,10 +61,10 @@ class Game
 
   def evaluate_answer
     if @answer == @question.answer
-      return "Well done, " + @player1.name + '!'
+      puts "Well done, " + @player1.name + '!'
     else 
       @current_player.life -= 1
-      return "Seriously? No!"
+      puts "Seriously? No!"
     end
   end
 
@@ -68,4 +83,5 @@ class Game
   def put_score
     puts @player1.name + ": " + @player1.life.to_s + "/3 vs. " + @player2.name + ": " + @player2.life.to_s + "/3"
   end
+
 end
